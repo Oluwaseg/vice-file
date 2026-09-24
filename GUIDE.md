@@ -29,33 +29,23 @@ This is a polished vertical slice, not a large game. The image editor is a core 
 6. Multiple-choice deductions plus annotation validation
 7. Case result, score, and unlocked records
 8. Simple case board and intelligence database
-9. `localStorage` persistence, responsive layout, empty/loading/error states
+9. Local persistence, responsive layout, and clear empty/loading/error states
 
 ### Deliberately defer
 
 - Authentication, a database, uploads to cloud storage
 - AI-generated narratives or evaluation
-- Multiplayer, real-time functionality, maps, sound effects
-- Multiple full cases (design the data model to support them)
-- Social sharing, payments, complex achievements
+- Multiplayer, real-time functionality, maps, and sound effects
+- Multiple full cases
+- Social sharing, payments, and complex achievements
 
 **Definition of done:** a fresh user can create an identity, finish Case 001, see its linked suspect/vehicle/location records, refresh the page, and still see their progress.
 
 ## 3. Primary user flow
 
-```text
-LANDING
-  → create identity (details + portrait edit)
-  → identity card reveal
-  → dashboard
-  → Case 001 briefing
-  → evidence lab (annotate image)
-  → answer deductions
-  → scoring / case resolution
-  → case board + unlocked intelligence records
-```
+Landing → create identity → identity card reveal → dashboard → Case 001 briefing → evidence lab → answer deductions → scoring and resolution → case board + unlocked intelligence records
 
-Keep the main call-to-action obvious at every step. The first minute should show: **upload → edit → identity reveal → active investigation**.
+Keep the main call-to-action obvious at every step. The first minute should show: upload, edit, identity reveal, and active investigation.
 
 ## 4. Case 001: The Night Run
 
@@ -63,177 +53,121 @@ Keep the main call-to-action obvious at every step. The first minute should show
 
 ### Required case data
 
-- `case-001` title, briefing, objectives, completion status
-- One original/licensed evidence image with three intentional clues
-- Correct answers: vehicle, location, and clue region
-- Records unlocked on completion: `red-comet`, `vice-beach`, `the-ghost`
-- Target annotation rectangle expressed in image-relative coordinates (`x`, `y`, `width`, `height` from 0 to 1)
+- Case title, briefing, objectives, and completion status
+- One original evidence image with three intentional clues
+- Correct answers for the vehicle, location, and clue region
+- Records that unlock on completion
+- A target annotation area for the evidence task
 
 ### Evaluation approach
 
-Do not use AI evaluation for the MVP. On submission:
+Use a simple, deterministic scoring model: the user’s mark is compared with the intended clue area, then combined with the selected answers and a forgiving pass threshold. This keeps the result fair and clear while making the image editing part of the gameplay.
 
-1. Record the user annotation's bounding rectangle.
-2. Calculate overlap with the target rectangle (intersection-over-union or target coverage).
-3. Combine annotation score with the two selected answers.
-4. Pass at a forgiving threshold (for example 60%) and show actionable feedback.
+## 5. Product architecture
 
-This makes image manipulation demonstrably part of gameplay while keeping the result deterministic.
+Keep the experience frontend-only for the first slice. The app should feel like a responsive intelligence terminal, with persistent player progress and a clear progression loop from identity creation to case resolution.
 
-## 5. Technical architecture
+The key product priorities are:
 
-This repository is already a Next.js + TypeScript + Tailwind project. Keep it frontend-only for the first slice.
-
-```text
-src/
-  app/                         # routes and page composition
-  components/
-    ui/                        # buttons, panels, status chips, dialogs
-    identity/                  # identity form, card, portrait editor wrapper
-    cases/                     # briefing, evidence lab, questions, result
-    database/                  # record cards and record details
-  data/
-    cases.ts                   # authored case/evidence/clue definitions
-    records.ts                 # authored suspects, vehicles, locations
-  lib/
-    storage.ts                 # versioned localStorage reads/writes
-    scoring.ts                 # pure overlap and case-score functions
-    types.ts                   # Player, CaseProgress, Annotation, Record
-  hooks/                       # client-side player state hook
-public/
-  images/                      # project-owned/licensed evidence and textures
-```
-
-### State to persist
-
-```ts
-type Player = {
-  alias: string;
-  role: "street-racer" | "club-owner" | "fixer";
-  neighbourhood: string;
-  portraitDataUrl?: string;
-  createdAt: string;
-};
-
-type CaseProgress = {
-  caseId: string;
-  status: "locked" | "active" | "complete";
-  answers: Record<string, string>;
-  annotation?: { x: number; y: number; width: number; height: number };
-  editedEvidenceDataUrl?: string;
-  score?: number;
-};
-```
-
-Store a versioned single application state under a project-specific key, e.g. `vice-files:v1`. Validate missing/corrupt data and provide a reset-progress control in the profile/settings area.
-
-### Image-editor integration decision
-
-The chosen editor must support: client-side rendering in Next.js, loading a local/user image, exporting an edited image, and exposing annotation geometry (or a practical equivalent). Prototype this integration before designing the entire Evidence Lab around it.
-
-- Dynamically import browser-only editor code to avoid server-rendering failures.
-- Wrap it behind an `ImageEditor` component so a library change stays local.
-- Preserve original image dimensions and normalise annotation coordinates before scoring.
-- If the editor cannot expose drawing/shape coordinates, overlay a purpose-built selectable bounding-box interaction for the scoring objective while still using the editor for visual editing.
+- A clear landing and identity creation flow
+- A single polished investigation loop
+- Strong local persistence
+- Distinct case, board, and database screens
+- A fictional noir tone with readable, high-contrast interface design
 
 ## 6. Routes and screen responsibilities
 
-| Route | Purpose | MVP status |
-| --- | --- | --- |
-| `/` | Atmospheric entry; begin/resume | Build |
-| `/identity` | Player details and portrait workflow | Build |
-| `/dashboard` | Active case, progress, recent evidence | Build |
-| `/cases/001` | Briefing, evidence and questions | Build |
-| `/cases/001/result` | Score, outcome, unlocked records | Build |
-| `/board/001` | Linked clue/evidence view | Build, simple |
-| `/database` | Discovered record list/detail | Build, simple |
-| `/profile` | Identity card and reset progress | Build, simple |
+- Landing page: atmospheric entry and resume flow
+- Identity screen: player detail and portrait workflow
+- Dashboard: active case, progress, and recent evidence
+- Case briefing pages: story setup, objectives, and upcoming tasks
+- Evidence lab: image editing, annotation, and deduction input
+- Resolution screen: score, outcome, and unlocked records
+- Case board: linked clue and evidence view
+- Intelligence database: discovered record list and details
+- Profile area: identity card and reset progress
 
-Avoid building a route for every future content idea now. Use authored data and add routes only when Case 002 exists.
+Keep the structure lean and focused on the first playable loop. Avoid adding route complexity before the core case flow is polished.
 
 ## 7. Design system
 
-Visual direction: **modern intelligence terminal + neon coastal noir**.
+Visual direction: modern intelligence terminal + neon coastal noir.
 
-- Base: near-black/navy; panels are slightly lighter, not flat black.
-- Accent palette: hot coral/pink, electric cyan, muted amber. Use one accent as the primary action colour per screen.
-- Typography: condensed display face for case labels; clean sans-serif for reading and controls.
-- Texture: restrained grain, scanlines, map grid, timestamp metadata—never enough to harm contrast.
-- Motion: short reveal/transitions and optional reduced-motion support.
-- Mobile: vertically stacked workflow, touch-safe controls, no desktop-only case board assumptions.
+- Base palette: near-black and navy with slightly lighter panels
+- Accent palette: hot coral/pink, electric cyan, and muted amber
+- Typography: condensed display for case labels and clean sans-serif for readable interface text
+- Texture: restrained grain, scanlines, map-grid notes, and timestamp metadata
+- Motion: short subtle transitions and reduced-motion friendliness
+- Mobile: stacked workflow, touch-safe controls, and no desktop-only assumptions
 
-Create tokens for colours, spacing, radii, shadows, and typography before composing screens. Build reusable dossier panels, evidence cards, section labels, status chips, and primary/secondary buttons.
+Build reusable dossier panels, evidence cards, section labels, status chips, and primary/secondary actions so the interface feels consistent across the experience.
 
 ## 8. Implementation order
 
 ### Milestone A — Foundation
 
-- Inspect the starter app and establish the global theme/layout.
-- Add types, authored Case 001/record data, and local persistence.
-- Create reusable UI primitives and a temporary navigation shell.
+- Establish the global theme and application shell
+- Define the core product structure and persistence approach
+- Create the introductory identity flow and navigation shell
 
-**Checkpoint:** the app runs, routes work, and a seeded player/case can render from data.
+**Checkpoint:** the app runs, routes work, and a seeded player/case can render from local data.
 
 ### Milestone B — Identity loop
 
-- Build landing and identity form.
-- Integrate/prototype the image editor and save an edited portrait.
-- Generate the identity-card reveal and persist the player.
+- Build the landing and identity form
+- Prototype the image editor and save an edited portrait
+- Generate the identity-card reveal and persist the player
 
-**Checkpoint:** a new browser session can create a player and arrive at dashboard after refresh.
+**Checkpoint:** a new browser session can create a player and arrive at the dashboard after refresh.
 
 ### Milestone C — Investigation loop
 
-- Build briefing and evidence-lab screens around the final editor wrapper.
-- Add annotation capture/normalisation and pure scoring tests.
-- Add deduction questions, submission, resolution screen, and unlock logic.
+- Build the briefing and evidence-lab screens around the editor workflow
+- Capture annotation and deduction input
+- Add submission, resolution, and unlock logic
 
 **Checkpoint:** Case 001 can be fully solved without manual state editing.
 
 ### Milestone D — World payoff
 
-- Build lightweight case board and database from unlocked records.
-- Add dashboard progress and evidence history.
-- Ensure locked records do not reveal spoilers.
+- Build the case board and intelligence database from unlocked records
+- Add dashboard progress and evidence history
+- Make locked content remain hidden until it is earned
 
 **Checkpoint:** completion visibly changes more than one screen.
 
 ### Milestone E — Product finish
 
-- Responsive and accessibility pass (keyboard, focus, alt text, contrast, reduced motion).
-- Test reloads, malformed storage, image load failures, and reset flow.
-- Add README: concept, setup, stack, gameplay flow, assets/attribution, deployment link.
-- Build, deploy, and test the production URL on mobile and desktop.
+- Responsive and accessibility pass
+- Validate reloads, malformed storage, image-load errors, and reset flow
+- Confirm the visual style feels cohesive and readable on mobile and desktop
 
 ## 9. Risks and mitigations
 
-| Risk | Mitigation |
-| --- | --- |
-| Editor is hard to integrate with Next.js | Prove dynamic import/export in Milestone B before proceeding. |
-| Annotation data is unavailable | Use a separate normalized target-selection overlay. |
-| `localStorage` data URLs exceed browser limits | Resize/compress exports; store only one or two images; later move to cloud storage. |
-| Scope grows into a game | Do not start Case 002 until Case 001 is polished end-to-end. |
-| Copyright/brand confusion | Original world, names, copy, art, icons, and audio; document asset sources. |
-| Visual effects hurt usability | Make effects decorative, preserve contrast and readable metadata. |
+- Image editor complexity: prove the editor flow early before expanding the case system
+- Missing annotation data: keep a fallback interaction for scoring if the editor cannot expose precise geometry
+- Local storage limits: keep persisted assets lean and compress if needed
+- Scope creep: do not start additional cases until the first one is polished end-to-end
+- Brand confusion: keep all art, names, icons, and tone original and clearly fictional
+- Visual effects hurting usability: keep them decorative and maintain high contrast
 
 ## 10. Testing checklist
 
-- New user, returning user, and reset user flows
-- Portrait upload accepts/rejects expected file types and fails gracefully
-- Portrait/evidence export works after a hard refresh
-- Annotation score is correct for overlap, miss, and partial overlap
-- Incorrect answers give useful feedback; pass threshold is forgiving
-- Locked records stay hidden; completion unlocks the intended three records
-- Keyboard navigation, visible focus, responsive viewports, and reduced motion
-- `pnpm lint` and `pnpm build` pass before deployment
+- New-user, returning-user, and reset-user flows
+- Portrait upload accepts and rejects expected file types gracefully
+- Portrait and evidence export survive refreshes
+- Annotation scoring behaves correctly for perfect, partial, and missed overlap
+- Incorrect answers provide useful feedback while the threshold remains forgiving
+- Locked records stay hidden until completion unlocks them
+- Keyboard navigation, visible focus, responsive viewports, and reduced motion remain intact
 
 ## 11. First implementation task
 
-Start with **Milestone A plus the editor feasibility spike**:
+Start with the foundation and editor feasibility spike:
 
-1. Set up the visual tokens and application shell.
-2. Add the core types and one authored Case 001 data file.
-3. Integrate a minimal editor page that can load an image and export it in this Next.js app.
-4. Decide whether the editor supplies usable annotation geometry.
+1. Set up the visual tokens and app shell
+2. Define the core product data model and one authored Case 001 flow
+3. Integrate a minimal image editor page that can load and export an image in the app
+4. Decide whether the editor can supply usable annotation geometry
 
-Only after that spike succeeds should we build the identity screens and Evidence Lab on top of it.
+Only after that spike succeeds should the identity screens and evidence lab be built on top of it.
