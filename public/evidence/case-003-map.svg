@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
+<defs><linearGradient id="ocean" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#071b2b"/><stop offset="1" stop-color="#123b4a"/></linearGradient><filter id="glow"><feGaussianBlur stdDeviation="8"/></filter></defs>
+<rect width="1600" height="900" fill="#091019"/><path d="M0 0h590c80 95 57 162 147 216 83 50 62 156 168 190 76 25 124 98 120 174-4 83-83 118-114 208-24 69 24 103 21 112H0z" fill="url(#ocean)"/>
+<g opacity=".28" stroke="#4bd5d6" stroke-width="2"><path d="M0 110h1600M0 220h1600M0 330h1600M0 440h1600M0 550h1600M0 660h1600M0 770h1600"/><path d="M150 0v900M300 0v900M450 0v900M600 0v900M750 0v900M900 0v900M1050 0v900M1200 0v900M1350 0v900M1500 0v900"/></g>
+<g fill="none" stroke="#aeb9c0" stroke-width="12" opacity=".8"><path d="M635 130 800 185l170-35 140 90 210-20 150 105"/><path d="m635 430 150-82 164 81 166-18 130 120 215-64"/><path d="m610 708 185-104 140 62 170-20 155 90 233-51"/></g>
+<g fill="#ff6ba9"><circle cx="789" cy="348" r="13"/><circle cx="1112" cy="411" r="13"/><circle cx="1261" cy="736" r="13"/></g><g fill="#61ebec"><circle cx="795" cy="604" r="15"/><circle cx="1110" cy="647" r="15"/></g>
+<circle cx="795" cy="604" r="54" fill="#61ebec" opacity=".22" filter="url(#glow)"/><circle cx="795" cy="604" r="25" fill="none" stroke="#61ebec" stroke-width="5"/>
+<g font-family="Arial, sans-serif" fill="#eaf5f6"><text x="650" y="95" font-size="28" letter-spacing="6">VICE CITY INTELLIGENCE GRID</text><text x="740" y="580" font-size="25" font-weight="700">SOLSTICE PIER</text><text x="1040" y="385" font-size="22">MIRAGE DISTRICT</text><text x="1160" y="700" font-size="22">NIGHT MARKET</text><text x="700" y="750" font-size="22">VICE BEACH</text></g>
+<g fill="#b8c4cb" font-family="monospace" font-size="18"><text x="650" y="125">INTERCEPT 03 / ROUTE RECONSTRUCTION / 04:08 AM</text><text x="56" y="848">COASTAL NETWORK / UNVERIFIED SIGNAL NODES / DO NOT DISTRIBUTE</text></g>
+</svg>
